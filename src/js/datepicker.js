@@ -722,7 +722,22 @@
         },
 
         _getDimensions: function ($el) {
+            // Fix offset for WebKit based browser when viewport is zoomed-in
+            // see https://github.com/jquery/jquery/issues/3187
             var offset = $el.offset();
+            //get document element width without scrollbar
+            var prevStyle = document.body.style.overflow || '';
+            document.body.style.overflow = 'hidden';
+            var docWidth = document.documentElement.clientWidth;
+            document.body.style.overflow = prevStyle;
+            // kind of a hack to determine if the viewport has been scaled
+            if(docWidth / window.innerWidth !== 1) {
+                var docRect = document.documentElement.getBoundingClientRect();
+                offset = {
+                    top: offset.top - window.pageYOffset - docRect.top,
+                    left: offset.left - window.pageXOffset - docRect.left
+                };
+            }
 
             return {
                 width: $el.outerWidth(),
